@@ -14,11 +14,11 @@ import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth); 
+  const { user } = useSelector((state) => state.auth);
 
   const handleLogout = () => {
     dispatch(logoutUser());
-    navigate("/"); 
+    navigate("/login");
   };
 
   return (
@@ -31,27 +31,27 @@ function Header() {
 
         <div>
           {user ? (
-          
+
             <div className="user-menu">
               <NavLink className="user-name" to="/profile">
-              <FontAwesomeIcon icon={faCircleUser} size="lg" />
-              <span> {user.firstName} {user.lastName}</span>
+                <FontAwesomeIcon icon={faCircleUser} size="lg" />
+                <span> {user.firstName} {user.lastName}</span>
               </NavLink>
               <span onClick={handleLogout} className="logout-button">
-              <FontAwesomeIcon icon={faRightFromBracket} size="lg" /> Sign Out
+                <FontAwesomeIcon icon={faRightFromBracket} size="lg" /> Sign Out
               </span>
             </div>
           ) : (
-           
+
             <NavLink className="sign-in" to="/Login">
-              
-                <div>
-              <FontAwesomeIcon icon={faCircleUser} size="lg" />
+
+              <div>
+                <FontAwesomeIcon icon={faCircleUser} size="lg" />
               </div>
               <div>
                 Sign In
-                </div>
-                
+              </div>
+
             </NavLink>
           )}
         </div>

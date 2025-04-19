@@ -9,6 +9,8 @@ import Login from "./Login";
 import { Provider } from 'react-redux';
 import store from './store/store';
 import Profile from './profile';
+import PrivateRoute from "./components/PrivateRoute";
+
 
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -20,8 +22,15 @@ root.render(
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/Login" element={<Login />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="*" element={<Error404 />} />
+          <Route
+        path="/profile"
+        element={
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
+        }
+      />          
+      <Route path="*" element={<Error404 />} />
         </Routes>
         <Footer />
       </Router>
@@ -29,4 +38,3 @@ root.render(
   </Provider>
 
 );
-

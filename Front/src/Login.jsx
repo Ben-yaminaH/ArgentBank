@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "./slices/authSlice";
+import { loginUser, fetchUserProfile, clearError } from "./slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleUser } from "@fortawesome/free-solid-svg-icons";
@@ -8,6 +8,7 @@ import { faCircleUser } from "@fortawesome/free-solid-svg-icons";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [formError, setFormError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, isLoading, error } = useSelector((state) => state.auth);
@@ -18,18 +19,35 @@ const Login = () => {
     }
   }, [user, navigate]);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (error) {
+      console.error("Erreur du serveur :", error);
+    }
+  }, [error]);
+
+  const handleLogin = async () => {
     if (!email || !password) {
-      alert("Veuillez remplir tous les champs.");
+      console.log("Champs vides détectés");
+      setFormError("Veuillez remplir tous les champs.");
       return;
     }
+
     try {
+      setFormError("");
+      dispatch(clearError());
+
       const result = await dispatch(loginUser({ email, password })).unwrap();
-      console.log("Résultat de loginUser:", result);
+      console.log("Token reçu :", result.token);
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token manquant après connexion.");
+      }
+
+      await dispatch(fetchUserProfile());
       navigate("/profile");
     } catch (err) {
-      console.error("Erreur de connexion :", err);
+      console.error("Erreur de connexion :", err.message || err);
     }
   };
 
@@ -38,7 +56,7 @@ const Login = () => {
       <section className="sign-in-content">
         <FontAwesomeIcon icon={faCircleUser} size="lg" />
         <h2>Connexion</h2>
-        <form onSubmit={handleLogin}>
+        <div>
           <div className="input-wrapper">
             <label htmlFor="email">Email</label>
             <input
@@ -47,6 +65,11 @@ const Login = () => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              style={
+                formError && !email
+                  ? { border: "2px solid red", backgroundColor: "#fff0f0" }
+                  : {}
+              }
               required
             />
           </div>
@@ -58,6 +81,11 @@ const Login = () => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              style={
+                formError && !password
+                  ? { border: "2px solid red", backgroundColor: "#fff0f0" }
+                  : {}
+              }
               required
             />
           </div>
@@ -65,11 +93,24 @@ const Login = () => {
             <input type="checkbox" id="remember-me" />
             <label htmlFor="remember-me">Remember me</label>
           </div>
-          <button type="submit" className="sign-in-button">
-            {isLoading ? "Connexion..." : "Sign in"}
+          <button type="button" onClick={handleLogin} className="sign-in-button">
+            {isLoading ? "Connexion..." : "Se connecter"}
           </button>
-          {error && <p style={{ color: "red" }}>{error}</p>}
-        </form>
+
+          {/* Erreur de formulaire (champs vides) */}
+          {formError && (
+            <p className="error-message" style={{ color: "orange", marginTop: "1rem" }}>
+              {formError}
+            </p>
+          )}
+
+          {/* Erreur API/serveur */}
+          {error && !formError && (
+            <p className="error-message" style={{ color: "red", marginTop: "1rem" }}>
+              {typeof error === "string" ? error : error.message}
+            </p>
+          )}
+        </div>
       </section>
     </main>
   );
