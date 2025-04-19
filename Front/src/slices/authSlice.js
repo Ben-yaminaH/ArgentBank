@@ -1,3 +1,4 @@
+// authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
@@ -10,51 +11,25 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await axios.post(`${API_URL}/login`, userData);
       const token = response.data.body.token;
-
       localStorage.setItem('token', token);
-
       return { token };
     } catch (error) {
-      const genericErrorMessage = "Identifiants invalides.";
-      return thunkAPI.rejectWithValue(genericErrorMessage);
+      return thunkAPI.rejectWithValue("Identifiants invalides.");
     }
   }
 );
 
-
-// Fetch profile
+// Récupération du profil
 export const fetchUserProfile = createAsyncThunk('auth/fetchUserProfile', async (_, thunkAPI) => {
   const token = localStorage.getItem('token');
-
-  if (!token) {
-    return thunkAPI.rejectWithValue("");
-  }
-
+  if (!token) return thunkAPI.rejectWithValue("");
   try {
     const response = await axios.post(`${API_URL}/profile`, {}, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data.body;
   } catch (error) {
-    const message =
-      error.response?.data?.message || 'Impossible de récupérer le profil';
-    return thunkAPI.rejectWithValue(message);
-  }
-});
-
-
-// Mise à jour du profil
-export const updateUserProfile = createAsyncThunk('auth/updateUserProfile', async (userData, thunkAPI) => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await axios.put(`${API_URL}/profile`, userData, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
-  } catch (error) {
-    const message =
-      error.response?.data?.message || 'Erreur lors de la mise à jour du profil';
-    return thunkAPI.rejectWithValue(message);
+    return thunkAPI.rejectWithValue(error.response?.data?.message || 'Impossible de récupérer le profil');
   }
 });
 
@@ -73,11 +48,9 @@ const authSlice = createSlice({
     error: null,
   },
   reducers: {
-
     clearError: (state) => {
       state.error = null;
     },
-
   },
   extraReducers: (builder) => {
     builder
@@ -87,12 +60,12 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.token = action.payload.token; 
+        state.token = action.payload.token;
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload; 
+        state.error = action.payload;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;

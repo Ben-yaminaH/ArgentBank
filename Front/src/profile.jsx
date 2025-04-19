@@ -1,7 +1,9 @@
 // Profile.jsx
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateUserProfile, fetchUserProfile } from "./slices/authSlice";
+import { fetchUserProfile } from "./slices/authSlice";
+import { updateUserProfile } from "./slices/updateSlice";
+
 import "./css/modal.css";
 
 const Profile = () => {
